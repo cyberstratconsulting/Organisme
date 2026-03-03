@@ -76,11 +76,11 @@ def _load_cache() -> bool:
     """Load from local cache if it exists and is < 24h old."""
     if not CACHE_FILE.exists() or not META_FILE.exists():
         return False
-    meta = json.loads(META_FILE.read_text())
+    meta = json.loads(META_FILE.read_text(encoding="utf-8"))
     age = time.time() - meta.get("downloaded_at", 0)
     if age > 86400:
         return False
-    data = json.loads(CACHE_FILE.read_text())
+    data = json.loads(CACHE_FILE.read_text(encoding="utf-8"))
     _store["all"] = data
     _store["non_qualiopi"] = [r for r in data if not _is_qualiopi(r)]
     _store["loaded_at"] = meta.get("downloaded_at_iso")
@@ -89,12 +89,12 @@ def _load_cache() -> bool:
 
 def _save_cache(rows: list[dict]) -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    CACHE_FILE.write_text(json.dumps(rows, ensure_ascii=False))
+    CACHE_FILE.write_text(json.dumps(rows, ensure_ascii=False), encoding="utf-8")
     META_FILE.write_text(json.dumps({
         "downloaded_at": time.time(),
         "downloaded_at_iso": datetime.now().isoformat(),
         "total_rows": len(rows),
-    }))
+    }), encoding="utf-8")
 
 
 # ---------------------------------------------------------------------------
@@ -555,7 +555,7 @@ async def exporter(
     out_path = Path(fichier)
 
     if format == "json":
-        out_path.write_text(json.dumps(results, ensure_ascii=False, indent=2))
+        out_path.write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
     else:
         output = io.StringIO()
         if results:
